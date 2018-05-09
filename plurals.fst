@@ -68,6 +68,13 @@ define WCenter W & [$ "I1"];
 # Valued worlds
 define WV [True | False] W;
 
+# Valued worlds with centering properties.
+define WV2 [True | False] W2;
+define WV1 [True | False] W1;
+define WV0 [True | False] W0;
+define WVNull [True | False] WNull;
+define WVCenter [True | False] WCenter;
+
 # True-valued worlds
 define Wt WV & [True ?*];
 
@@ -95,6 +102,15 @@ define ReBind [W .x. W] & [Idx -> Idx];
 # Function macro for ReBind.
 define DoReBind(X) Co(X .o. ReBind);
 
+# Conditional rebinding transducer; only rebinds (peri)centers that do not
+# already exist in the world.
+define ConditionalReBind [[W1 .x. W] & [[Idx - "I1"] (->) "I2"]] |
+                         [[WV1 .x. WV] & [[Idx - "I1"] (->) "I2"]] |
+                         [[WNull .x. W] & [Idx (->) ["I1" | "I2"]]] |
+                         [[WVNull .x. WV] & [Idx (->) ["I1" | "I2"]]];
+
+# Function macro for conditional rebind.
+define DoConditionalReBind(X) Co(X .o. ConditionalReBind);
 
 #######
 #
@@ -104,7 +120,7 @@ define DoReBind(X) Co(X .o. ReBind);
 
 # A transducer for popping centers.
 define PopT "I1" -> "INull"   ,,
-            "I2" -> "I1"      ,,
+            "I2" -> "I1" ,,
             "INull" (->) "I2" ,,
             "I0" (->) "I2";
 
@@ -173,20 +189,11 @@ define MaxR(X) [X .o. AddCenterT] & [X .x. X];
 # The given property is maximal.
 define Max(X) Proposition(TrueWorlds(X) - Do(MaxR(TrueWorlds(X)))) - UndefinedWorlds(X);
 
-# The definite article "quantifier".
-define Def(X, Y) Transplicate(Indef(X, Y), Max(X));
+# The singular definite article.
+define SgDef(X, Y) Transplicate(Indef(X, Y), Unique(X));
 
-# The nominative singular definite article.
-define NomSgDef(X, Y) Transplicate(Nom(Indef(X, Y)), Unique(X));
-
-# The nominative plural definite article.
-define NomPlDef(X, Y) Transplicate(Nom(Indef(X, Y)), Max(X));
-
-# The accusative singular definite article.
-define AccSgDef(X, Y) Transplicate(Acc(Indef(X, Y)), Unique(X));
-
-# The accusative plural definite article.
-define AccPlDef(X, Y) Transplicate(Acc(Indef(X, Y)), Max(X));
+# The plural definite article.
+define PlDef(X, Y) Transplicate(DoConditionalReBind(Indef(X, Y)), Max(X));
 
 #######
 #
@@ -225,22 +232,6 @@ define KP(X) Transplicate(KV(X), X);
 
 #######
 #
-# Case
-#
-#######
-
-# Transducer to create nominatives; allows centers and pericenters to
-# re-appear.
-define NomT Idx (->) "I1" ,,
-            Idx (->) "I2";
-define Nom(X) Co(X .o. NomT);
-
-# Transducer to create accusatives; allows pericenters to re-appear.
-define AccT [Idx - "I1"] (->) "I2";
-define Acc(X) Co(X .o. AccT);
-
-#######
-#
 # EXAMPLES
 #
 #######
@@ -252,13 +243,10 @@ define Example11 Indef(HasId("c"), Indef(HasId("d"), Adj));
 define Example15 KP(Example11);
 
 # The "c" is next to a "d".
-define Example22 Def(HasId("c"), Def(HasId("d"), Adj));
+define Example22 SgDef(HasId("c"), SgDef(HasId("d"), Adj));
 
 # Some "c"s are next to a "d".
 define SomeC Indef(Plural(HasId("c")), Indef(HasId("d"), Adj));
 
 # The "c"s are next to a "d".
-define TheCs NomPlDef(Plural(HasId("c")), Indef(HasId("d"), Adj));
-
-# A "c" is next to the "d"s.
-define TheDs Indef(HasId("c"), AccPlDef(Plural(HasId("d")), Adj));
+define TheCs PlDef(Plural(HasId("c")), Indef(HasId("d"), Adj));
