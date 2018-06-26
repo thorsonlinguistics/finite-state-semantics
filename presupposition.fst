@@ -191,10 +191,10 @@ define KP(X) Transplicate(KV(X), X);
 #######
 
 # A "c" is next to a "d".
-define Example11 Indef(HasId("c"), Indef(HasId("d"), Adj));
+define CatDog Indef(HasId("c"), Indef(HasId("d"), Adj));
 
 # The agent knows that a "c" is next to a "d".
-define Example15 KP(Example11);
+define KnowsCatDog KP(Example11);
 
 # The "c" is next to a "d".
-define Example22 Def(HasId("c"), Def(HasId("d"), Adj));
+define TheCatDog Def(HasId("c"), Def(HasId("d"), Adj));
